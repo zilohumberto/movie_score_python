@@ -5,4 +5,5 @@ ENV PYTHONPATH /opt/web-socket/
 RUN mkdir -p /opt/web-socket/
 ADD . /opt/web-socket/
 WORKDIR /opt/web-socket/
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt 
