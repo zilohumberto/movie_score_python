@@ -15,11 +15,15 @@ class Handler(object):
 
     def __init__(self, send):
         self.send = send
+        
+    async def say_hello(self):
+        await self.send({'type': 'websocket.send', 'text': 'hola mundo'})
 
     async def consumer(self, receive):
+        await self.send({'type': 'websocket.accept'})
         self.cache = CacheGateway()
         await self.cache.get_pool()
-        self.rooms = self.cache.lget('rooms')
+        await self.say_hello()
         while True:
             try:
                 message = await receive()
@@ -50,6 +54,13 @@ class Handler(object):
                 raise Exception()
             self.cache.lset(self.uuid, message)
             await self.send({'type': 'websocket.send', 'text': message})
+            try:
+                md = loads(message)
+                if 'action' in md and hasattr(self, md['action']):
+                    action = getattr(self, md['action'])
+                    await action(**md['params'])
+            except:
+                pass
 
     async def produce_message(self, text):
         raise NotImplementedError('produce_message not implemented!')

@@ -5,12 +5,12 @@ from json import dumps, loads
 
 
 class MovieScore(Handler):
+    room = None
+
     async def produce_message(self, text):
         actions_function = {
             'join_room': self.join_room,
             'left_room': self.left_room,
-            'get_rooms': self.get_rooms,
-            'create_room': self.create_room,
             'play': self.play,
         }
         body = loads(text)
@@ -18,40 +18,24 @@ class MovieScore(Handler):
         if action in actions_function:
             await actions_function[action](**body.get('params'))
 
-    async def join_room(self, room, **kwargs):
-        if room not in self.rooms:
-            await self.send(dict(type='websocket.send', text='room dont exist, use create_room'))
+    async def join_room(self, user_key, **kwargs):
+        code = self.cache.get(user_key)
+        if not code:
+            to_send = dumps(dict(action='invalid_code', params={}))
+            await self.send(dict(type='websocket.send', text=to_send))
             return
-        subscription, = await self.cache.subscribe(room)
-        get_running_loop().create_task(self.reader(subscription))
-        self.user = self.uuid 
-        self.cache.publish_message(room, dict(action='joined_room', params=dict(room=room, user=self.user)))
-
-    async def left_room(self, room, **kwargs):
-        self.cache.publish_message(room, dict(action='left_room', params=dict(room=room, user=self.user)))
-
-    async def get_rooms(self, **kwargs):
-        rooms = self.cache.lget('rooms')
-        await self.send(
-            {
-                'type': 'websocket.send', 
-                'text': dumps(
-                            {'action': 'get_rooms',
-                            'params': {'rooms': rooms}
-                            })
-            }
-        )
-
-    async def create_room(self, room, **kwargs):
-        if room in self.rooms:
-            await self.send(dict(type='websocket.send', text=f'{room} already exist'))
-            return
-        self.cache.lset('rooms', room)
-        self.rooms.append(room)
-        await self.send(dict(type='websocket.send', text=f'room {room} created'))
-        await self.join_room(room)
+        to_send = dumps(dict(action='accepted_code', params={}))
+        await self.send(dict(type='websocket.send', text=to_send))
+        self.cache.delete(user_key)
+        self.room = code
+        self.cache.publish_message(
+            self.room, 
+            dict(action='joined_room', params=dict(user=self.uuid, user_key=user_key))
+        ) 
         
+    async def left_room(self, **kwargs):
+        self.cache.publish_message(self.room, dict(action='left_room', params=dict(user=self.uuid)))
+        self.room = None
 
     async def play(self, **kwargs):
-        pass
-    
+        self.cache.publish_message(self.room, dict(action='play', params=dict(user=self.uuid, **kwargs))) 
