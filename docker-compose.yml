@@ -1,5 +1,23 @@
-redis:
-  image: redis
-  container_name: movie-player-redis
-  ports:
-    - "6379:6379"
+version: '3'
+
+services:
+  redis:
+    image: redis
+    container_name: movie-player-redis
+    ports:
+      - "6380:6379"
+
+  app:
+    build: .
+    command: python server.py
+    volumes:
+      - .:/opt/web-socket
+    env_file:
+      - .env
+    ports:
+      - "8500:8500"
+    expose:
+      - "8500"
+    network_mode: "host"
+    depends_on: 
+      - redis

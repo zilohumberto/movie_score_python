@@ -18,7 +18,7 @@ class Handler(object):
         self.uuid = str(uuid4())
         
     async def say_hello(self):
-        await self.send({'type': 'websocket.send', 'text': 'hola mundo ' + self.uuid})
+        await self.send({'type': 'websocket.send', 'text': 'hola mundo'})
 
     async def consumer(self, receive):
         await self.send({'type': 'websocket.accept'})
