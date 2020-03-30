@@ -5,7 +5,7 @@ from app.cache import CacheGateway
 
 
 class Handler(object):
-    uuid = str(uuid4())
+    uuid = None
     cache = None
     send = None
     task_end = False
@@ -15,9 +15,10 @@ class Handler(object):
 
     def __init__(self, send):
         self.send = send
+        self.uuid = str(uuid4())
         
     async def say_hello(self):
-        await self.send({'type': 'websocket.send', 'text': 'hola mundo'})
+        await self.send({'type': 'websocket.send', 'text': 'hola mundo ' + self.uuid})
 
     async def consumer(self, receive):
         await self.send({'type': 'websocket.accept'})

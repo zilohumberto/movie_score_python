@@ -39,7 +39,7 @@ class Judge(Handler):
 
     async def start_play(self, **kwargs):
         for i in range(3, 0, -1):
-            to_send = dumps(dict(action='starting_play', params=dict(time=i)))
+            to_send = dumps(dict(action='starting_play', params=dict(time=i, users=self.users)))
             await self.send(dict(type='websocket.send', text=to_send))
             await sleep(5)
 
@@ -60,7 +60,7 @@ class Judge(Handler):
             )
         )
         self.opcion_correcta = '1'
-        rounds = 0
+        rounds = 1
 
     async def joined_room(self, user, user_key, **kwargs):
         self.users[user] = {'wons': 0}
@@ -75,12 +75,12 @@ class Judge(Handler):
             winner = user
             self.users[user]['wons'] += 1
         
-        self.rounds += 1
         if self.rounds == 3:
-            to_send = dumps(dict(action='end_game', params=dict(uses=self.users)))
+            to_send = dumps(dict(action='end_game', params=dict(users=self.users)))
             await self.send(dict(type='websocket.send', text=to_send))
             return 
-        
-        to_send = dumps(action='end_round', params=dict(won=winner))
+        self.rounds += 1
+
+        to_send = dumps(dict(action='end_round', params=dict(won=winner, users=self.users)))
         await self.send(dict(type='websocket.send', text=to_send))
         await self.start_play()
