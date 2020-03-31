@@ -3,7 +3,7 @@ from json import dumps, loads
 from uuid import uuid4
 from asyncio import sleep, get_running_loop
 from app.settings import VELOCITY_PRE_GAME
-
+from app.resources import movies   
 
 class Judge(Handler):
     connected_users = 0
@@ -49,7 +49,10 @@ class Judge(Handler):
                     action='start_play', 
                     params=dict(
                         round=self.rounds,
-                        options={'1':'Pelicula A', '2':'Pelicula B'},
+                        options=[
+                            {'key': '1', 'data': movies.movie_1},
+                            {'key': '2', 'data': movies.movie_2}
+                        ],
                         users=self.users,
                     )
             )
