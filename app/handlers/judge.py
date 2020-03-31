@@ -2,6 +2,7 @@ from app.handlers.handler import Handler
 from json import dumps, loads
 from uuid import uuid4
 from asyncio import sleep, get_running_loop
+from app.settings import VELOCITY_PRE_GAME
 
 
 class Judge(Handler):
@@ -41,7 +42,7 @@ class Judge(Handler):
         for i in range(3, 0, -1):
             to_send = dumps(dict(action='starting_play', params=dict(time=i, users=self.users)))
             await self.send(dict(type='websocket.send', text=to_send))
-            await sleep(5)
+            await sleep(VELOCITY_PRE_GAME)
 
         to_send = dumps(
             dict(
