@@ -11,7 +11,7 @@ class MovieScore(Handler):
         actions_function = {
             'join_room': self.join_room,
             'left_room': self.left_room,
-            'play': self.play,
+            'play': self._play,
         }
         body = loads(text)
         action = body.get('action', None)
@@ -31,11 +31,16 @@ class MovieScore(Handler):
         self.cache.publish_message(
             self.room, 
             dict(action='joined_room', params=dict(user=self.uuid, user_key=user_key))
-        ) 
+        )
+        subscription, = await self.cache.subscribe(self.room)
+        get_running_loop().create_task(self.reader(subscription))
         
     async def left_room(self, **kwargs):
         self.cache.publish_message(self.room, dict(action='left_room', params=dict(user=self.uuid)))
         self.room = None
 
-    async def play(self, **kwargs):
+    async def _play(self, **kwargs):
         self.cache.publish_message(self.room, dict(action='play', params=dict(user=self.uuid, **kwargs))) 
+
+    # async def play(self, **kwargs):
+    #     # a opponent play before you? yes

@@ -53,7 +53,7 @@ class Handler(object):
             except:
                 self.task_end = True
                 raise Exception()
-            self.cache.lset(self.uuid, message)
+            # self.cache.lset(self.uuid, message)
             await self.send({'type': 'websocket.send', 'text': message})
             try:
                 md = loads(message)
