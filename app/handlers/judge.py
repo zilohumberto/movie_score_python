@@ -2,7 +2,7 @@ from app.handlers.handler import Handler
 from json import dumps, loads
 from uuid import uuid4
 from asyncio import sleep, get_running_loop
-from app.settings import VELOCITY_PRE_GAME
+from app.settings import VELOCITY_PRE_GAME, MAX_ROUND_PER_GAME
 from app.resources import movies   
 
 class Judge(Handler):
@@ -73,12 +73,12 @@ class Judge(Handler):
             winner = user
             self.users[user]['wons'] += 1
 
-        if self.rounds == 3:
+        if self.rounds == MAX_ROUND_PER_GAME:
             to_send = dict(action='end_game', params=dict(users=self.users))
             self.cache.publish_message(self.uuid, to_send)
             return 
         self.rounds += 1
-        
+
         to_send = dict(action='end_round', params=dict(won=winner, users=self.users))
         self.cache.publish_message(self.uuid, to_send)
         await self._start_play()
