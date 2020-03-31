@@ -43,7 +43,7 @@ class Judge(Handler):
             to_send = dumps(dict(action='starting_play', params=dict(time=i, users=self.users)))
             await self.send(dict(type='websocket.send', text=to_send))
             await sleep(VELOCITY_PRE_GAME)
-
+            
         to_send = dumps(
             dict(
                     action='start_play', 
