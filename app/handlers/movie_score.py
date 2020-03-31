@@ -2,6 +2,7 @@ from app.handlers.handler import Handler
 from uuid import uuid4
 from asyncio import sleep, get_running_loop
 from json import dumps, loads
+from requests import get
 
 
 class MovieScore(Handler):
@@ -18,15 +19,25 @@ class MovieScore(Handler):
         if action in actions_function:
             await actions_function[action](**body.get('params'))
 
+    def get_person(self):
+        r = get(url="https://randomuser.me/api/?results=1")
+        if r.status_code != 200:
+            return
+        person = loads(r.text)
+        return person['results'][0]
+
     async def join_room(self, user_key, **kwargs):
         code = self.cache.get(user_key)
         if not code:
             to_send = dumps(dict(action='invalid_code', params={}))
             await self.send(dict(type='websocket.send', text=to_send))
             return
-        to_send = dumps(dict(action='accepted_code', params={}))
+        person = self.get_person()
+        to_send = dumps(dict(action='accepted_code', params=dict(person=person)))
+        
         await self.send(dict(type='websocket.send', text=to_send))
         self.cache.delete(user_key)
+        self.cache.set(self.uuid, person, is_json=True, expires=600)
         self.room = code
         self.cache.publish_message(
             self.room, 

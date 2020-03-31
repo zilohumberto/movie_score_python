@@ -41,7 +41,7 @@ class Judge(Handler):
     async def _start_play(self, **kwargs):
         for i in range(3, 0, -1):
             to_send = dict(action='starting_play', params=dict(
-                time=i, round=self.rounds, users=self.users)
+                time=i, round=self.rounds, users={})
             )
             self.cache.publish_message(self.uuid, to_send)
             await sleep(VELOCITY_PRE_GAME)
@@ -54,7 +54,7 @@ class Judge(Handler):
                             {'key': '1', 'data': movies.movie_1},
                             {'key': '2', 'data': movies.movie_2}
                         ],
-                        users=self.users,
+                        users={},
                     )
             )
         self.cache.publish_message(self.uuid, to_send)
@@ -64,6 +64,11 @@ class Judge(Handler):
         self.users[user] = {'wons': 0}
         self.codes.remove(user_key)
         if len(self.codes) == 0:
+            self.persons = list()
+            for key, value in self.users.items():
+                person = loads(self.cache.get(key))
+                person.update({'wons': 0})
+                self.persons.append(person)
             await self._start_play()
         # todo we continue waiting for others users!
 
@@ -71,14 +76,15 @@ class Judge(Handler):
         winner = None
         if answer == self.opcion_correcta:
             winner = user
-            self.users[user]['wons'] += 1
+            index = list(self.users.keys()).index(user)
+            self.persons[index]['wons'] += 1
 
         if self.rounds == MAX_ROUND_PER_GAME:
-            to_send = dict(action='end_game', params=dict(users=self.users))
+            to_send = dict(action='end_game', params=dict(users=self.persons))
             self.cache.publish_message(self.uuid, to_send)
             return 
         self.rounds += 1
 
-        to_send = dict(action='end_round', params=dict(won=winner, users=self.users))
+        to_send = dict(action='end_round', params=dict(won=winner, users=self.persons))
         self.cache.publish_message(self.uuid, to_send)
         await self._start_play()
