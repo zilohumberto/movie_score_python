@@ -40,19 +40,17 @@ class CacheGateway:
             self.pool.close()
             await self.pool.wait_closed()
 
-    def get(self, key, is_json=False, is_pickle=False):
+    def get(self, key):
         value = self.queue.get(key)
-        if is_json:
-            return json.loads(value)
-        if is_pickle:
-            return pickle.loads(value)
-        return value
-
-    def set(self, key, value, is_json=False, is_pickle=False, expires=None):
-        if is_json:
+        if isinstance(value, dict):
             formatted_value = json.dumps(value)
-        elif is_pickle:
-            formatted_value = pickle.dumps(value)
+        else:
+            formatted_value = value
+        return formatted_value
+
+    def set(self, key, value, expires=None):
+        if isinstance(value, dict):
+            formatted_value = json.dumps(value)
         else:
             formatted_value = value
 

@@ -37,7 +37,7 @@ class MovieScore(Handler):
         
         await self.send(dict(type='websocket.send', text=to_send))
         self.cache.delete(user_key)
-        self.cache.set(self.uuid, person, is_json=True, expires=600)
+        self.cache.set(self.uuid, person, expires=600)
         self.room = code
         self.cache.publish_message(
             self.room, 

@@ -5,6 +5,7 @@ from asyncio import sleep, get_running_loop
 from app.settings import VELOCITY_PRE_GAME, MAX_ROUND_PER_GAME
 from app.resources import movies   
 
+
 class Judge(Handler):
     connected_users = 0
     codes = set()
