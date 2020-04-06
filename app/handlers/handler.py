@@ -57,11 +57,11 @@ class Handler(object):
             await self.send({'type': 'websocket.send', 'text': message})
             try:
                 md = loads(message)
+                if 'action' in md and hasattr(self, md['action']):
+                    action = getattr(self, md['action'])
+                    await action(**md['params'])
             except:
-                return
-            if 'action' in md and hasattr(self, md['action']):
-                action = getattr(self, md['action'])
-                await action(**md['params'])
+                pass
 
     async def produce_message(self, text):
         raise NotImplementedError('produce_message not implemented!')

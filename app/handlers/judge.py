@@ -3,7 +3,9 @@ from json import dumps, loads
 from uuid import uuid4
 from asyncio import sleep, get_running_loop
 from app.settings import VELOCITY_PRE_GAME, MAX_ROUND_PER_GAME
-from app.resources import movies   
+from app.resources import movies
+from app.resources.codes import get_codes_radom
+from random import random
 
 
 class Judge(Handler):
@@ -28,7 +30,7 @@ class Judge(Handler):
             await actions_function[action](**body.get('params'))
 
     async def get_codes(self, **kwargs):
-        self.codes = ['1234', '4321']
+        self.codes = get_codes_radom(2)
         to_send = dumps(dict(action='get_codes', params=dict(codes=self.codes)))
         await self.send(dict(type='websocket.send', text=to_send))
         self.connected_users = 0
@@ -48,20 +50,21 @@ class Judge(Handler):
             self.cache.publish_message(self.uuid, to_send)
             await sleep(VELOCITY_PRE_GAME)
 
+        movie_1, movie_2 = movies.get_movie()
         to_send = dict(
                     action='start_play', 
                     params=dict(
                         question="What movie is more popular?",
                         round=self.rounds,
                         options=[
-                            {'key': '1', 'data': movies.movie_1},
-                            {'key': '2', 'data': movies.movie_2}
+                            {'key': '1', 'data': movie_1},
+                            {'key': '2', 'data': movie_2}
                         ],
                         users=self.persons,
                     )
             )
         self.cache.publish_message(self.uuid, to_send)
-        self.opcion_correcta = '1'
+        self.opcion_correcta = "1" if movie_1["imdbRating"] > movie_2["imdbRating"] else "2"
 
     async def joined_room(self, user, user_key, **kwargs):
         self.users[user] = {'wons': 0}
