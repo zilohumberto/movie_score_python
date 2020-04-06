@@ -42,20 +42,22 @@ class Judge(Handler):
     async def _start_play(self, **kwargs):
         for i in range(3, 0, -1):
             to_send = dict(action='starting_play', params=dict(
-                time=i, round=self.rounds, users={})
+                time=i, round=self.rounds, users=self.persons)
             )
+            await self.send(dict(type='websocket.send', text=dumps(to_send)))
             self.cache.publish_message(self.uuid, to_send)
             await sleep(VELOCITY_PRE_GAME)
 
         to_send = dict(
                     action='start_play', 
                     params=dict(
+                        question="What movie is more popular?",
                         round=self.rounds,
                         options=[
                             {'key': '1', 'data': movies.movie_1},
                             {'key': '2', 'data': movies.movie_2}
                         ],
-                        users={},
+                        users=self.persons,
                     )
             )
         self.cache.publish_message(self.uuid, to_send)

@@ -32,6 +32,7 @@ class MovieScore(Handler):
             to_send = dumps(dict(action='invalid_code', params={}))
             await self.send(dict(type='websocket.send', text=to_send))
             return
+
         person = self.get_person()
         to_send = dumps(dict(action='accepted_code', params=dict(person=person)))
         
