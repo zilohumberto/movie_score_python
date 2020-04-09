@@ -71,7 +71,7 @@ class Judge(Handler):
         self.codes.remove(user_key)
         if len(self.codes) == 0:
             self.persons = list()
-            for key, value in self.users.items():
+            for key, _ in self.users.items():
                 person = loads(self.cache.get(key))
                 person.update({'wons': 0})
                 self.persons.append(person)
@@ -89,7 +89,6 @@ class Judge(Handler):
             to_send = dict(action='end_game', params=dict(users=self.persons))
             self.cache.publish_message(self.uuid, to_send)
             return 
-        self.rounds += 1
 
         to_send = dict(action='end_round', params=dict(won=winner, users=self.persons))
         self.cache.publish_message(self.uuid, to_send)
