@@ -1,5 +1,5 @@
 import uvicorn
-import os  
+from app.settings import HOST, PORT, LOG_LEVEL
 from app.runserver import runserver
 
 if __name__ == "__main__":
@@ -9,8 +9,8 @@ if __name__ == "__main__":
         interface='asgi3',
         loop='asyncio',
         lifespan='off',
-        host=os.getenv('HOST','127.0.0.1'),
-        port=int(os.getenv('PORT', '8500')),
-        log_level=os.getenv('LOG_LEVEL', 'debug'),
+        host=HOST,
+        port=PORT,
+        log_level=LOG_LEVEL,
         timeout_keep_alive=1000
     )

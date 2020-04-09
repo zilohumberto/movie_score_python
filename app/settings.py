@@ -1,8 +1,11 @@
-import os
+from decouple import config
 
-
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', '6380'))
-API_MOVIE_KEY = os.getenv('API_MOVIE_KEY')
-VELOCITY_PRE_GAME = float(os.getenv('VELOCITY_PRE_GAME', '1'))
-MAX_ROUND_PER_GAME = int(os.getenv('MAX_ROUND_PER_GAME', '3'))
+REDIS_HOST = config('REDIS_HOST', default='127.0.0.1')
+REDIS_PORT = config('REDIS_PORT', default='6380', cast=int)
+API_MOVIE_KEY = config('API_MOVIE_KEY', default='')
+VELOCITY_PRE_GAME = config('VELOCITY_PRE_GAME', default='1', cast=int)
+MAX_ROUND_PER_GAME = config('MAX_ROUND_PER_GAME', default='3', cast=float)
+HOST = config('HOST', default='127.0.0.1')
+PORT = config('PORT', default='8500', cast=int)
+LOG_LEVEL = config('LOG_LEVEL', default='info')
+print(HOST, PORT, LOG_LEVEL)
