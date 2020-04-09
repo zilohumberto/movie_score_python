@@ -90,6 +90,7 @@ class Judge(Handler):
             self.cache.publish_message(self.uuid, to_send)
             return 
 
+        self.rounds += 1
         to_send = dict(action='end_round', params=dict(won=winner, users=self.persons))
         self.cache.publish_message(self.uuid, to_send)
         await self._start_play()
